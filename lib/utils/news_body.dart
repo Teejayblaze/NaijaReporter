@@ -7,7 +7,7 @@ class NaijaReportersNewsBody extends StatelessWidget {
   NaijaReportersNewsBody({this.news, this.showModalSheet});
 
   final NaijaReportersNews news;
-  VoidCallback showModalSheet;
+  final VoidCallback showModalSheet;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class NaijaReportersNewsBody extends StatelessWidget {
             end: Alignment(1.0, 1.0),
             colors: [
               Colors.white,
-              this.news.bgColor
+              Color(this.news.bgColor)
             ],
           ),
         ),
@@ -75,10 +75,7 @@ class NaijaReportersNewsBody extends StatelessWidget {
                       Navigator.of(context).push(
                         MaterialPageRoute(builder: (BuildContext context) => NaijaReportersNewsDetails(
                           heroTag: "${this.news.id}-news",
-                          imagePath: this.news.imagePath,
-                          title: this.news.title,
-                          subTitle: this.news.subtitle,
-                          category: this.news.category,
+                          news: this.news,
                         )),
                       );
                     },
@@ -86,7 +83,7 @@ class NaijaReportersNewsBody extends StatelessWidget {
                       tag: "${this.news.id}-news",
                       child: ClipRRect(
                         child: Container(
-                          child: Image.asset(this.news.imagePath,
+                          child: Image.network(this.news.imagePath,
                             fit: BoxFit.cover,
                           ),
                           height: 180.0,
@@ -117,16 +114,69 @@ class NaijaReportersNewsBody extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
-                            Text(this.news.duration),
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text("${this.news.duration} - ${this.news.read} read"),
 
-//                          Bookmarked Icon on the HomeScreen.
-                            IconButton(
-                              padding: EdgeInsets.all(3.0),
-                              icon: Icon(Icons.bookmark_border),
-                              onPressed: (){}
-                            )
+                                SizedBox(height: 2.0,),
+
+                                this.news.author != null ? Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(100.0),
+                                      child: SizedBox(
+                                        width: 40.0,
+                                        height: 40.0,
+                                        child: Image.network(this.news.author.imagePath, fit: BoxFit.cover,),
+                                      ),
+                                    ),
+                                    SizedBox(width: 8.0,),
+                                    Text(this.news.author.name, style: TextStyle(
+                                        fontWeight: FontWeight.w600
+                                      ),
+                                    )
+                                  ],
+                                ) : Row(),
+                              ],
+                            ),
+
+
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: <Widget>[
+                                //Bookmarked Icon on the HomeScreen.
+                                IconButton(
+                                    padding: EdgeInsets.all(0.0),
+                                    icon: Icon(IconData(0xeec0, fontFamily: 'icofont'), color: Colors.black87,),
+                                    onPressed: (){}
+                                ),
+
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+
+                                    //Like Icon on the HomeScreen.
+                                    IconButton(
+                                        padding: EdgeInsets.all(0.0),
+                                        icon: Icon(IconData(0xef6e, fontFamily: 'icofont'), color: Colors.black87,),
+                                        onPressed: (){}
+                                    ),
+
+//                                    Text("+1", style: TextStyle(
+//                                        fontWeight: FontWeight.w600,
+//                                      ),
+//                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+
                           ],
-                        )
+                        ),
                       ],
                     ),
                   ),
@@ -186,7 +236,7 @@ class NaijaReportersNewsBody extends StatelessWidget {
                           child: SizedBox(
                             width: 60.0,
                             height: 60.0,
-                            child: Image.asset(similar[index].imagePath,
+                            child: Image.network(similar[index].imagePath,
                               fit: BoxFit.cover,
                             ),
                           ),

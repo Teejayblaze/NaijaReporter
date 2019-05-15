@@ -18,7 +18,7 @@ class NaijaReporterSimilarNewsDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
 
         Container(
@@ -26,6 +26,7 @@ class NaijaReporterSimilarNewsDetails extends StatelessWidget {
           child: Column(
             children: <Widget>[
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Flexible(
                     flex: 2,
@@ -39,11 +40,12 @@ class NaijaReporterSimilarNewsDetails extends StatelessWidget {
                     child: SizedBox(
                       width: 80.0,
                       height: 80.0,
-                      child: Image.asset(this.imagePath, fit: BoxFit.cover,),
+                      child: Image.network(this.imagePath, fit: BoxFit.cover,),
                     ),
                   )
                 ],
               ),
+              SizedBox(height: 8.0,),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
@@ -53,6 +55,7 @@ class NaijaReporterSimilarNewsDetails extends StatelessWidget {
                       Text(this.author, style: TextStyle(
                           fontWeight: FontWeight.w600
                       ),),
+                      SizedBox(height: 5.0,),
                       Text(this.usefulInfo, style: TextStyle(
                         fontWeight: FontWeight.w500,
                         color: Colors.black54,
@@ -62,7 +65,7 @@ class NaijaReporterSimilarNewsDetails extends StatelessWidget {
                   ),
 
                   IconButton(
-                      icon: Icon(Icons.bookmark_border),
+                      icon: Icon(IconData(0xeec0, fontFamily: 'icofont')),
                       onPressed: (){}
                   ),
                 ],

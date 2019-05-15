@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:naija_reporter/utils/nr_custom_clipper.dart';
 import 'package:naija_reporter/screens/news_categories.dart';
+import 'package:naija_reporter/screens/user_profile.dart';
+import 'package:naija_reporter/screens/user_preferences.dart';
+import 'package:naija_reporter/screens/claim_reward.dart';
+import 'package:naija_reporter/screens/reward_history.dart';
+import 'package:naija_reporter/screens/news_publishing.dart';
+import 'package:naija_reporter/models/news_category.dart';
 
 class CustomMenuPageView extends StatelessWidget {
 
@@ -11,7 +17,8 @@ class CustomMenuPageView extends StatelessWidget {
     this.headerHeight,
     this.size,
     this.showMenuDrawer,
-    this.menuAnimationController
+    this.menuAnimationController,
+    this.newsCategoryStream,
   });
 
   final double offsetX;
@@ -20,6 +27,7 @@ class CustomMenuPageView extends StatelessWidget {
   final Size size;
   final Function showMenuDrawer;
   final AnimationController menuAnimationController;
+  final Stream<List<NaijaReportersNewsCategory>> newsCategoryStream;
 
   @override
   Widget build(BuildContext context) {
@@ -41,35 +49,42 @@ class CustomMenuPageView extends StatelessWidget {
                   color: Colors.black87,
                   height: headerHeight,
                   width: double.infinity,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(100.0),
-                        child: SizedBox(
-                          width: 80.0,
-                          height: 80.0,
-                          child: Image.asset("images/adetunji.jpg", fit: BoxFit.cover,),
+                  child: GestureDetector(
+                    onTap: (){
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (BuildContext context) => NaijaReportersUserProfile()),
+                      );
+                    },
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(100.0),
+                          child: SizedBox(
+                            width: 80.0,
+                            height: 80.0,
+                            child: Image.asset("images/adetunji.jpg", fit: BoxFit.cover,),
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 5.0,),
-                      Text("Ademola Odumosu", style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 28.0,
-                        color: Colors.white,
-                      ),
-                        softWrap: true,
-                        overflow: TextOverflow.clip,
-                      ),
-                      Text("odumosu.ademola@gmail.com", style: TextStyle(
-                        fontSize: 13.0,
-                        color: Colors.white,
-                      ),
-                      ),
-                    ],
-                  )
+                        SizedBox(height: 5.0,),
+                        Text("Ademola Odumosu", style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 28.0,
+                          color: Colors.white,
+                        ),
+                          softWrap: true,
+                          overflow: TextOverflow.clip,
+                        ),
+                        Text("odumosu.ademola@gmail.com", style: TextStyle(
+                          fontSize: 13.0,
+                          color: Colors.white,
+                        ),
+                        ),
+                      ],
+                    ),
+                  ),
               ),
             ),
 
@@ -83,64 +98,92 @@ class CustomMenuPageView extends StatelessWidget {
     );
   }
 
-  ListView _buildListMenu(BuildContext context) => ListView(
-    padding: EdgeInsets.only(top: 0.0),
-    physics: BouncingScrollPhysics(),
-    children: <Widget>[
-      ListTile(
+  StreamBuilder _buildListMenu(BuildContext context) =>  StreamBuilder<List<NaijaReportersNewsCategory>>(
+      initialData: null,
+      stream: newsCategoryStream,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        
+        if (snapshot.hasError) {
+          return Text("${snapshot.error}");
+        }
+        else if (snapshot.hasData) {
+
+          return ListView(
+              padding: EdgeInsets.only(top: 0.0),
+              physics: BouncingScrollPhysics(),
+              children:
+              _getTopMenuList(context) +
+
+              snapshot.data.map<ListTile>((newsCategory) => ListTile(
+                key: Key("${newsCategory.id}"),
+                title: Text(newsCategory.category, style: TextStyle(fontWeight: FontWeight.w600),),
+                leading: Icon(IconData(newsCategory.icon, fontFamily: newsCategory.fontFamily), color: Colors.black,),
+                onTap: () => this._navigate(context, newsCategory.category, null),
+              )).toList()
+
+              + _getRewardMenuList(context) + _getSettingsMenuList(context),
+          );
+
+        }
+        return CircularProgressIndicator();
+      }
+    );
+
+  void _navigate(BuildContext context, String category, Widget newPage) => Navigator.of(context).push(
+      MaterialPageRoute(
+          builder: (BuildContext context) => newPage == null ? new NaijaReporterNewsCategories(
+            category: category,
+            showMenuDrawer: this.showMenuDrawer,
+            menuAnimationController: this.menuAnimationController,
+          ) : newPage,
+      ),
+  );
+
+  List<Widget> _getTopMenuList(BuildContext context) {
+    return [
+    ListTile(
         title: Text("Bookmarked News", style: TextStyle(fontWeight: FontWeight.w600),),
-        leading: Icon(Icons.bookmark, color: Colors.black,),
+        leading: Icon(IconData(0xeec0, fontFamily: 'icofont'), color: Colors.black,),
+      ),
+      ListTile(
+        title: Text("Publish a News", style: TextStyle(fontWeight: FontWeight.w600),),
+        leading: Icon(IconData(0xebc3, fontFamily: 'icofont'), color: Colors.black,), //0xeae5
+        onTap: (){
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (BuildContext context) => NaijaReportersNewsPublishing())
+          );
+        },
       ),
       Divider(color: Colors.black26,),
       Padding(
         padding: EdgeInsets.only(left: 15.0),
         child: Text("News Updates"),
       ),
-      ListTile(
-        title: Text("Politics", style: TextStyle(fontWeight: FontWeight.w600),),
-        leading: Icon(Icons.all_inclusive, color: Colors.black,),
-        onTap: () => this._navigate(context, "Politics"),
+    ];
+  }
+
+  List<Widget> _getRewardMenuList(BuildContext context) {
+    return [
+      Divider(color: Colors.black26,),
+      Padding(
+        padding: EdgeInsets.only(left: 15.0),
+        child: Text("Rewards"),
       ),
       ListTile(
-        title: Text("Fashion", style: TextStyle(fontWeight: FontWeight.w600),),
-        leading: Icon(Icons.wc, color: Colors.black,),
-        onTap: () => this._navigate(context, "Fashion"),
+        title: Text("Claim Rewards", style: TextStyle(fontWeight: FontWeight.w600),),
+        leading: Icon(IconData(0xe972, fontFamily: 'icofont'), color: Colors.black,),
+        onTap: () => this._navigate(context, null, NaijaReportersClaimReward(category: "Claim Reward",)),
       ),
       ListTile(
-        title: Text("Lifestyle", style: TextStyle(fontWeight: FontWeight.w600),),
-        leading: Icon(Icons.accessibility, color: Colors.black,),
-        onTap: () => this._navigate(context, "Lifestyle"),
+        title: Text("Rewards History", style: TextStyle(fontWeight: FontWeight.w600),),
+        leading: Icon(IconData(0xef46, fontFamily: 'icofont'), color: Colors.black,), //0xef37
+        onTap: () => this._navigate(context, null, NaijaReportersRewardHistory(category: "Reward History",)),
       ),
-      ListTile(
-        title: Text("Sport", style: TextStyle(fontWeight: FontWeight.w600),),
-        leading: Icon(Icons.directions_run, color: Colors.black,),
-        onTap: () => this._navigate(context, "Sport"),
-      ),
-      ListTile(
-        title: Text("Entertainment", style: TextStyle(fontWeight: FontWeight.w600),),
-        leading: Icon(Icons.mic, color: Colors.black,),
-        onTap: () => this._navigate(context, "Entertainment"),
-      ),
-      ListTile(
-        title: Text("Healthy Living", style: TextStyle(fontWeight: FontWeight.w600),),
-        leading: Icon(Icons.verified_user, color: Colors.black,),
-        onTap: () => this._navigate(context, "Healthy Living"),
-      ),
-      ListTile(
-        title: Text("Society", style: TextStyle(fontWeight: FontWeight.w600),),
-        leading: Icon(Icons.transfer_within_a_station, color: Colors.black,),
-        onTap: () => this._navigate(context, "Society"),
-      ),
-      ListTile(
-        title: Text("Traveling", style: TextStyle(fontWeight: FontWeight.w600),),
-        leading: Icon(Icons.airplanemode_active, color: Colors.black,),
-        onTap: () => this._navigate(context, "Traveling"),
-      ),
-      ListTile(
-        title: Text("Dieting", style: TextStyle(fontWeight: FontWeight.w600),),
-        leading: Icon(Icons.local_dining, color: Colors.black,),
-        onTap: () => this._navigate(context, "Dieting"),
-      ),
+    ];
+  }
+
+  List<Widget> _getSettingsMenuList(BuildContext context) {
+    return [
       Divider(color: Colors.black26,),
       Padding(
         padding: EdgeInsets.only(left: 15.0),
@@ -148,28 +191,13 @@ class CustomMenuPageView extends StatelessWidget {
       ),
       ListTile(
         title: Text("Preferences", style: TextStyle(fontWeight: FontWeight.w600),),
-        leading: Icon(Icons.tune, color: Colors.black,),
-      ),
-      ListTile(
-        title: Text("Settings", style: TextStyle(fontWeight: FontWeight.w600),),
-        leading: Icon(Icons.settings, color: Colors.black,),
+        leading: Icon(IconData(0xef3b, fontFamily: "icofont"), color: Colors.black,),
+        onTap: () => this._navigate(context, null, NaijaReportersUserPreferences(category: "User Preferences",)),
       ),
       ListTile(
         title: Text("Logout", style: TextStyle(fontWeight: FontWeight.w600),),
-        leading: Icon(Icons.power_settings_new, color: Colors.black,),
+        leading: Icon(IconData(0xefc4, fontFamily: "icofont"), color: Colors.black,),
       ),
-    ],
-  );
-
-
-
-  void _navigate(BuildContext context, String category) => Navigator.of(context).push(
-      MaterialPageRoute(
-          builder: (BuildContext context) => new NaijaReporterNewsCategories(
-            category: category,
-            showMenuDrawer: this.showMenuDrawer,
-            menuAnimationController: this.menuAnimationController,
-          ),
-      ),
-  );
+    ];
+  }
 }
